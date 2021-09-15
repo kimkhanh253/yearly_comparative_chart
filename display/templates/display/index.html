@@ -43,16 +43,17 @@
     
     <body>
     {% if station1 %}
-      {{station1}}
+      {{station2}}
       <div id="chart" style="width: 1800px; height: 800px;"></div>
       <script>
         var name1 = "{{name1}}";
         var name2 = "{{name2}}";
-        var name2 = "{{name3}}";
+        var name3 = "{{name3}}";
+        console.log(name2);
 
         var station1 = {{station1|safe}};
-        //var station2 = {{station2|safe}};
-        //var station3 = {{station3|safe}};
+        var station2 = {{station2|safe}};
+        var station3 = {{station3|safe}};
 
         var allSeries = [];
 
@@ -126,60 +127,138 @@
         };
         allSeries.push(series_temp1,series_rain1,series_normal1_avgt,series_normal1_pcpn);
 
-        var chart = document.getElementById('chart');
-          var myChart = echarts.init(chart);
-          var option = {
-            title: {
-              text: '',
-              align: 'right'
+        if (name2 != ''){
+          var series_temp2={
+            name: name2+' avgt',
+            type: 'line',
+            data: station2['avgTemp'],
+            lineStyle: {
+                color: '#3f007d',
             },
-            tooltip : {
-              trigger: 'axis',
-              axisPointer: {
-                type: 'cross',
-                animation: false,
-                label: {
-                    backgroundColor: '#505765'
-                }
+            itemStyle: {
+              borderColor: '#3f007d',
+              color: '#3f007d'
+            }
+          };
+          var series_rain2={
+            name: name2+' pcpn',
+            type: 'bar',
+            areaStyle: {color: '#abd9e9'},
+            yAxisIndex: 1,
+            data: station2['rain'],
+            lineStyle: {
+                color: '#cab2d6',
+              },
+            itemStyle: {
+              borderColor: '#cab2d6',
+              color: '#cab2d6'
+            }
+          };
+          var series_normal2_avgt={
+            name: name2+' normal avgt',
+            type: 'line',
+            data: station2['normal_avgt'],
+            lineStyle: {
+              normal: {
+                  color: '#6a3d9a',
+                  width: 1,
+                  type: 'dashed'
               }
             },
-            legend: { data:[
-              name1+' avgt', 
-              /*name1+' pcpn',
-              name1+' normal avgt',
-              name1+' normal pcpn',*/
-            ]},
-            dataZoom: [{
-              show: true,
-              start: 65,
-              end: 85
-            },{
-              type: 'inside',
-              start: 65,
-              end: 85
-            }],
-            xAxis: { data: station1['time']},
-            yAxis: [
-              {
-                type: 'value',
-                name: 'Temperature',
-                show: true,
-                axisLabel: {
-                    formatter: '{value} F'
-                  }
-              },{
-                type: 'value',
-                name: 'Precipitation',
-                opposite:true,
-                show: true,
-                axisLabel: {
-                    formatter: '{value} in'
+            itemStyle: {
+                normal: {
+                    borderWidth: 1,
+                    borderColor: '#6a3d9a',
+                    color: '#6a3d9a'
                 }
-              } 
-            ],
-            series: allSeries
+            },
           };
-          myChart.setOption(option);
+          var series_normal2_pcpn={
+            name: name2+' normal pcpn',
+            type: 'line',
+            yAxisIndex: 1,
+            data: station2['normal_pcpn'],
+            lineStyle: {
+              normal: {
+                color: '#6a3d9a',
+                width: 1,
+                type: 'dashed'
+              }
+            },
+            itemStyle: {
+              normal: {
+                borderWidth: 1,
+                borderColor: '#6a3d9a',
+                color: '#6a3d9a'
+              }
+            },
+            areaStyle: {
+                color: '#6a3d9a',
+            },
+          };
+          allSeries.push(series_temp2,series_rain2,series_normal2_avgt,series_normal2_pcpn);
+        }
+        
+
+
+        var chart = document.getElementById('chart');
+        var myChart = echarts.init(chart);
+        var option = {
+          title: {
+            text: '',
+            align: 'right'
+          },
+          tooltip : {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross',
+              animation: false,
+              label: {
+                  backgroundColor: '#505765'
+              }
+            }
+          },
+          legend: { data:[
+            name1+' avgt', 
+            name1+' pcpn',
+            name1+' normal avgt',
+            name1+' normal pcpn',
+            /*name2+' avgt', 
+            name2+' pcpn',
+            name2+' normal avgt',
+            name2+' normal pcpn',*/
+          ]},
+          dataZoom: [{
+            show: true,
+            start: 65,
+            end: 85
+          },{
+            type: 'inside',
+            start: 65,
+            end: 85
+          }],
+          xAxis: { data: station1['time']},
+          yAxis: [
+            {
+              type: 'value',
+              name: 'Temperature',
+              show: true,
+              axisLabel: {
+                  formatter: '{value} F'
+                }
+            },{
+              type: 'value',
+              name: 'Precipitation',
+              opposite:true,
+              show: true,
+              axisLabel: {
+                  formatter: '{value} in'
+              }
+            } 
+          ],
+          series: allSeries
+        };
+        myChart.setOption(option);
       </script>             
     {% endif %}
   </body>
