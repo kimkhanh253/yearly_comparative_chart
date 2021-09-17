@@ -24,27 +24,34 @@ def get_station_data (station_id, year, w_normal, form):
     if station_id !='' and station_id !='----':   
         req = requests.get('http://data.rcc-acis.org/StnData?sid={}&sdate={}0101&edate={}1231&elems=avgt,pcpn&output=json&meta=name'.format(station_id, year, year))
         r = req.json()
-        df=pd.DataFrame(r['data'])
-        df.columns=['time','avgt','rainfall']
-        df['rainfall'] = df['rainfall'].replace('T',0).replace('M',0)
-        df['avgt'] = df['avgt'].replace('T',0).replace('M',0)
-        df['time']= pd.to_datetime(df['time'],format='%Y-%m-%d')
-        df['avgt']=df['avgt'].astype(float)
-        df['rainfall']=df['rainfall'].astype(float)
-        rain=[]
-        name=str(station_id)
-        avgTemp=[]
-        time=[]
-        for d in df.index:
-            avgTemp.append(df['avgt'][d])
-            rain.append(df['rainfall'][d])
-            time.append(str(df['time'][d]))
-        
-        content_to_update = ({
-            'avgTemp':avgTemp,
-            'rain': rain,
-            'time':time
-        })
+        if 'data' in r:
+            df=pd.DataFrame(r['data'])
+            df.columns=['time','avgt','rainfall']
+            df['rainfall'] = df['rainfall'].replace('T',0).replace('M',0)
+            df['avgt'] = df['avgt'].replace('T',0).replace('M',0)
+            df['time']= pd.to_datetime(df['time'],format='%Y-%m-%d')
+            df['avgt']=df['avgt'].astype(float)
+            df['rainfall']=df['rainfall'].astype(float)
+            rain=[]
+            name=str(station_id)
+            avgTemp=[]
+            time=[]
+            for d in df.index:
+                avgTemp.append(df['avgt'][d])
+                rain.append(df['rainfall'][d])
+                time.append(str(df['time'][d]))
+            
+            content_to_update = ({
+                'avgTemp':avgTemp,
+                'rain': rain,
+                'time':time
+            })
+        else:
+            content_to_update = ({
+                'avgTemp':[],
+                'rain': [],
+                'time':[]
+            })
         return content_to_update
     else:
         content_to_update = ({
@@ -132,7 +139,7 @@ def index (request):
                 content['station2']['normal_avgt'] = []
                 content['station2']['normal_pcpn'] = []
             
-            content['station3'] =  get_station_data (station3, year, w_normal3, form)
+            content['station3'] =  get_station_data(station3, year, w_normal3, form)
             if w_normal3==True:
                 new_content = get_normal_data(station3, start, end) 
                 content['station3'].update(new_content)
@@ -141,6 +148,7 @@ def index (request):
                 content['station3']['normal_pcpn'] = []
             
             return render(request,'display/index.html/', content)
+            
     else:
         form = InputBox()
     return render(request,'display/index.html/', {'form': form})
