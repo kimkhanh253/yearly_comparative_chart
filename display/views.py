@@ -1,5 +1,4 @@
 from django.shortcuts import render
-#from django.http import HttpResponse, HttpResponseRedirect
 from .models import InputBox
 import pandas as pd
 import json
@@ -20,14 +19,16 @@ elements_pcpn = [{
     'normal':'1'
 }]
 
-def check_input_data (station1, station2, station3):
+def check_input_station (station1, station2):
     station_count = 0
 
 def get_station_data (station_id, year, w_normal, form): 
     content_to_update = ({
         'avgTemp':[],
         'rain': [],
-        'time':[]
+        'time':[],
+        'normal_avgt':[], 
+        'normal_pcpn':[]
     })
     if station_id !='' and station_id !='----':   
         req = requests.get('http://data.rcc-acis.org/StnData?sid={}&sdate={}0101&edate={}1231&elems=avgt,pcpn&output=json&meta=name'.format(station_id, year, year))
@@ -54,10 +55,6 @@ def get_station_data (station_id, year, w_normal, form):
                 'rain': rain,
                 'time':time
             })
-    content_to_update.update({
-        'normal_avgt':[], 
-        'normal_pcpn':[]
-    })
     
     if w_normal == True:
         start = year+'-01-01'
@@ -113,10 +110,7 @@ def index (request):
         if form.is_valid():
             station1=str(form['station1'].data).upper()
             station2=str(form['station2'].data).upper()
-            station3=str(form['station3'].data).upper()
-            w_normal1 = form['w_normal1'].data
-            w_normal2 = form['w_normal2'].data
-            w_normal3 = form['w_normal3'].data
+            w_normal = form['w_normal'].data
             year = form['year'].data
             
             content ={
@@ -124,15 +118,11 @@ def index (request):
                 'year':year, 
                 'name1':station1,
                 'name2':station2,
-                'name3':station3,
-                'w_normal1':w_normal1, 
-                'w_normal2':w_normal2, 
-                'w_normal3':w_normal3
+                'w_normal':w_normal, 
             }
 
-            content['station1'] = get_station_data (station1, year, w_normal1, form)
-            content['station2'] = get_station_data (station2, year, w_normal2, form)
-            content['station3'] = get_station_data (station3, year, w_normal3, form)
+            content['station1'] = get_station_data (station1, year, w_normal, form)
+            content['station2'] = get_station_data (station2, year, w_normal, form)
             
             return render(request,'display/index.html/', content)
             
